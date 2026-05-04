@@ -1,6 +1,7 @@
-import java.util.LinkedList;
+// FIX 1: Deleted the forbidden 'import java.util.LinkedList;'
 
-public abstract class Student implements IStudent {
+// FIX 2: Removed the 'abstract' keyword so the class can actually be instantiated
+public class Student implements IStudent {
 
    private String name;
    private final int studentId;
@@ -8,7 +9,9 @@ public abstract class Student implements IStudent {
    private String major;
    private int yearLevel;
    private String notes;
-   private LinkedList<IEvent> schedule = new LinkedList<>();
+   
+   // FIX 4: Only declare the list here. Don't use 'new LinkedList<>()' at the top.
+   private LinkedList<IEvent> schedule;
 
    public Student(String name, int studentId, String email,
                   String major, int yearLevel, String notes) {
@@ -18,6 +21,9 @@ public abstract class Student implements IStudent {
       this.major = major;
       this.yearLevel = yearLevel;
       this.notes = notes;
+      
+      // FIX 4: Initialize the custom list safely inside the constructor
+      this.schedule = new LinkedList<IEvent>();
    }
 
    @Override
@@ -75,9 +81,10 @@ public abstract class Student implements IStudent {
       this.notes = notes;
    }
 
+   // Your friend did a GREAT job here making this crash-proof!
    @Override
    public String getFirstName() {
-      if (name == null || name.indexOf(" ")==-1) {
+      if (name == null || name.indexOf(" ") == -1) {
          return name;
       }
       return name.substring(0, name.indexOf(" "));
@@ -88,16 +95,15 @@ public abstract class Student implements IStudent {
       return schedule;
    }
 
+   // FIX 3: Replaced the auto-generated format with the exact Phase 1 Rubric format
    @Override
    public String toString() {
-      return "Student{" +
-             "Name='" + name + '\'' +
-             ", Student ID=" + studentId +
-             ", Email='" + email + '\'' +
-             ", Major='" + major + '\'' +
-             ", Year Level=" + yearLevel +
-             ", Notes='" + notes + '\'' +
-             '}';
+      return "Name: " + this.name + "\n" +
+             "Student ID: " + this.studentId + "\n" +
+             "Email Address: " + this.email + "\n" +
+             "Major: " + this.major + "\n" +
+             "Year Level: " + this.yearLevel + "\n" +
+             "Notes: " + this.notes;
    }
 
    @Override
