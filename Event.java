@@ -2,7 +2,6 @@ package datastructcureproject;
 
 public abstract class Event implements IEvent {
 
-    // HEY: Changed to exactly match how the tutor handles the variables!
     private final int eventId;
     private String title;
     
@@ -12,7 +11,6 @@ public abstract class Event implements IEvent {
     
     private String location;
 
-    // HEY: We now accept the eventId (eID) as a parameter, just like your tutor did!
     public Event(int eventId, String title, IDateTime startDateTime, IDateTime endDateTime, String location) {
         this.eventId = eventId;
         this.title = title;
