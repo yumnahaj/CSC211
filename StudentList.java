@@ -1,53 +1,66 @@
-// HEY: I removed the "import java.util.LinkedList" - strictly forbidden!
-// HEY: I removed "abstract" so the class actually works.
+package datastructcureproject;
 
 public class StudentList implements IStudentList {
 
-    // HEY: Just declare it here.
     private LinkedList<IStudent> students;
+    
+    private int size; 
 
-    // HEY: This is where we initialize it. It's safer for custom lists!
     public StudentList() {
         this.students = new LinkedList<IStudent>();
+        this.size = 0;
     }
 
     @Override
     public boolean add(IStudent student) {
         if (student == null) return false;
 
+        // If the list is empty, just drop it in.
         if (students.empty()) {
             students.insert(student); 
+            size++;
             return true;
         }
         
         students.findFirst();
         
-        // HEY: Handling the case where the new student has the smallest ID.
-        if (student.compareTo(students.retrieve()) < 0) {
-            students.insertAtBegin(student);
-            return true;
-        }
-        
-        // HEY: We use a 'while' loop with .findNext() because custom lists don't support 'for' loops.
-        // This checks for duplicate IDs while it finds the right spot (O(N) complexity).
-        while (!students.last() && (student.compareTo(students.retrieve()) >= 0)) {
-            if (student.getStudentId() == students.retrieve().getStudentId()) {
+        // HEY: We traverse to find the right sorted spot AND check for duplicates in one pass.
+        while (!students.last()) {
+            if (students.retrieve().getStudentId() == student.getStudentId()) {
                 return false; // Duplicate ID found!
+            }
+            
+            // HEY: If the new student belongs BEFORE the current student:
+            if (student.compareTo(students.retrieve()) < 0) {
+                // THE SWAP TRICK: Because our custom list only has "insert after", 
+                // we replace the current node's data with the new student, 
+                // and then insert the old data right after it!
+                IStudent temp = students.retrieve();
+                students.update(student);
+                students.insert(temp);
+                size++;
+                return true;
             }
             students.findNext();
         }
 
-        if (student.getStudentId() == students.retrieve().getStudentId()) {
+        // HEY: We exited the loop, so we must check the very last node!
+        if (students.retrieve().getStudentId() == student.getStudentId()) {
             return false; 
         }
         
-        // Final sorted insertion
-        int comp = student.compareTo(students.retrieve());
-        if (comp > 0) {
-            students.insert(student);
+        // Final check on the last node for placement
+        if (student.compareTo(students.retrieve()) < 0) {
+            // Apply the Swap Trick on the last node
+            IStudent temp = students.retrieve();
+            students.update(student);
+            students.insert(temp);
         } else {
-            students.insertBefore(student);
+            // It is the biggest ID, so it just goes at the very end
+            students.insert(student); 
         }
+        
+        size++;
         return true;
     }
 
@@ -60,7 +73,7 @@ public class StudentList implements IStudentList {
             int currentId = students.retrieve().getStudentId();
             if (currentId == studentId) return students.retrieve();
             
-            // HEY: EARLY EXIT! If we pass the ID, we stop to save time.
+            // Optimization: Stop early if we pass where the ID should be!
             if (currentId > studentId) return null; 
             
             students.findNext();
@@ -71,8 +84,8 @@ public class StudentList implements IStudentList {
 
     @Override
     public LinkedList<IStudent> findByName(String fullName) {
-        LinkedList<IStudent> result = new LinkedList<>();
-        if (students.empty()) return result;
+        LinkedList<IStudent> result = new LinkedList<IStudent>();
+        if (students.empty() || fullName == null) return result;
 
         students.findFirst();
         while (!students.last()) {
@@ -89,10 +102,9 @@ public class StudentList implements IStudentList {
 
     @Override
     public LinkedList<IStudent> findByNameContains(String partialName) {
-        LinkedList<IStudent> result = new LinkedList<>();
+        LinkedList<IStudent> result = new LinkedList<IStudent>();
         if (students.empty() || partialName == null) return result;
 
-        // HEY: This must be case-insensitive per the rubric.
         String key = partialName.toLowerCase();
 
         students.findFirst();
@@ -110,7 +122,7 @@ public class StudentList implements IStudentList {
 
     @Override
     public IStudent findByEmail(String email) {
-        if (students.empty()) return null;
+        if (students.empty() || email == null) return null;
 
         students.findFirst();
         while (!students.last()) {
@@ -127,8 +139,8 @@ public class StudentList implements IStudentList {
 
     @Override
     public LinkedList<IStudent> findByMajor(String major) {
-        LinkedList<IStudent> result = new LinkedList<>();
-        if (students.empty()) return result;
+        LinkedList<IStudent> result = new LinkedList<IStudent>();
+        if (students.empty() || major == null) return result;
 
         students.findFirst();
         while (!students.last()) {
@@ -145,7 +157,7 @@ public class StudentList implements IStudentList {
 
     @Override
     public LinkedList<IStudent> findByYearLevel(int yearLevel) {
-        LinkedList<IStudent> result = new LinkedList<>();
+        LinkedList<IStudent> result = new LinkedList<IStudent>();
         if (students.empty()) return result;
 
         students.findFirst();
@@ -163,8 +175,7 @@ public class StudentList implements IStudentList {
 
     @Override
     public LinkedList<IStudent> getAll() {
-        // HEY: We manually copy the list to protect the original data.
-        LinkedList<IStudent> copy = new LinkedList<>();
+        LinkedList<IStudent> copy = new LinkedList<IStudent>();
         if (students.empty()) return copy;
 
         students.findFirst();
@@ -184,15 +195,17 @@ public class StudentList implements IStudentList {
         while (!students.last()) {
             int currentId = students.retrieve().getStudentId();
             if (currentId == studentId) {
-                students.remove(); // HEY: Custom list uses .remove() on the cursor.
+                students.remove(); 
+                size--; // HEY: We must subtract from our manual size counter!
                 return true;
             }
-            // EARLY EXIT for better average complexity!
+            // Optimization: stop early if we pass it
             if (currentId > studentId) return false;
             students.findNext();
         }
         if (studentId == students.retrieve().getStudentId()) {
             students.remove();
+            size--; // HEY: Subtracting here too!
             return true;
         }
         return false;
@@ -200,7 +213,7 @@ public class StudentList implements IStudentList {
 
     @Override
     public int size() {
-        // HEY: Using .getSize() from our custom list class.
-        return students.getSize();
+        // HEY: We return our manual counter because the custom list has no getSize() method!
+        return this.size;
     }
 }
