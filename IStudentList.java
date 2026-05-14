@@ -1,8 +1,6 @@
 /**
  * Stores all students in a structure maintained in sorted order by studentId.
  */
- import java.util.LinkedList;
-
 public interface IStudentList {
 
     // Inserts a student into the list in sorted order by studentId. If a student with the same ID already exists, insertion fails.
