@@ -2,8 +2,6 @@
  * Represents a single student in the advising system.
  * Students are compared by studentId.
  */
- import java.util.LinkedList;
-
 public interface IStudent extends Comparable<IStudent> {
     //return the full name of the student.
     String getName();
