@@ -149,7 +149,7 @@ public class AdvisingSystem implements IAdvisingSystem {
     }
 
     @Override
-    public boolean deleteStudent(int studentId) {
+ /*   public boolean deleteStudent(int studentId) {
         IStudent student = studentList.findById(studentId);
         if (student == null) return false;
 
@@ -164,10 +164,9 @@ public class AdvisingSystem implements IAdvisingSystem {
             handleCascadeDeletion(allEvents.retrieve(), studentId);
         }
         return studentList.deleteById(studentId);
-    }
-
-    @Override
-    public boolean scheduleMeeting(String title, IDateTime startDateTime, IDateTime endDateTime, String location, int studentId) {
+    } 
+*/
+  public boolean scheduleMeeting(String title, IDateTime startDateTime, IDateTime endDateTime, String location, int studentId) {
         IStudent student = studentList.findById(studentId);
         if (student == null) return false; 
         if (hasConflict(student, startDateTime, endDateTime)) return false; 
@@ -181,7 +180,28 @@ public class AdvisingSystem implements IAdvisingSystem {
         return false;
     }
 
-    @Override
+    public boolean deleteStudent(int studentId) {
+        IStudent student = studentList.findById(studentId);
+        if (student == null) {
+            return false; // Safely return false if student doesn't exist
+        }
+
+        // 1. Get a temporary list of ONLY this student's events to loop through safely
+        LinkedList<IEvent> studentEvents = eventList.findByStudentName(student.getName());
+        
+        if (!studentEvents.empty()) {
+            studentEvents.findFirst();
+            while (!studentEvents.last()) {
+                handleCascadeDeletion(studentEvents.retrieve(), studentId);
+                studentEvents.findNext();
+            }
+            // Handle the final element
+            handleCascadeDeletion(studentEvents.retrieve(), studentId);
+        }
+
+        // 2. Finally, delete the student from the main list
+        return studentList.deleteById(studentId);
+    }
     public boolean scheduleWorkshop(String title, IDateTime startDateTime, IDateTime endDateTime, String location, int[] studentIds) {
         for (int i = 0; i < studentIds.length; i++) {
             if (studentList.findById(studentIds[i]) == null) return false;
