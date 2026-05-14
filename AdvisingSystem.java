@@ -149,23 +149,6 @@ public class AdvisingSystem implements IAdvisingSystem {
     }
 
     @Override
- /*   public boolean deleteStudent(int studentId) {
-        IStudent student = studentList.findById(studentId);
-        if (student == null) return false;
-
-        LinkedList<IEvent> allEvents = eventList.getAllAlphabetically();
-        
-        if (!allEvents.empty()) {
-            allEvents.findFirst();
-            while (!allEvents.last()) {
-                handleCascadeDeletion(allEvents.retrieve(), studentId);
-                allEvents.findNext();
-            }
-            handleCascadeDeletion(allEvents.retrieve(), studentId);
-        }
-        return studentList.deleteById(studentId);
-    } 
-*/
   public boolean scheduleMeeting(String title, IDateTime startDateTime, IDateTime endDateTime, String location, int studentId) {
         IStudent student = studentList.findById(studentId);
         if (student == null) return false; 
