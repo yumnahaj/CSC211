@@ -3,8 +3,7 @@ package datastructcureproject;
 public class StudentList implements IStudentList {
 
     private LinkedList<IStudent> students;
-    
-    private int size; 
+    private int size; // Manual counter (LinkedList ADT has no size method)
 
     public StudentList() {
         this.students = new LinkedList<IStudent>();
@@ -15,7 +14,7 @@ public class StudentList implements IStudentList {
     public boolean add(IStudent student) {
         if (student == null) return false;
 
-        // If the list is empty, just drop it in.
+        // Base case: first element
         if (students.empty()) {
             students.insert(student); 
             size++;
@@ -24,17 +23,12 @@ public class StudentList implements IStudentList {
         
         students.findFirst();
         
-        // HEY: We traverse to find the right sorted spot AND check for duplicates in one pass.
+        // Search for correct sorted position
         while (!students.last()) {
-            if (students.retrieve().getStudentId() == student.getStudentId()) {
-                return false; // Duplicate ID found!
-            }
+            if (students.retrieve().getStudentId() == student.getStudentId()) return false; // No duplicates
             
-            // HEY: If the new student belongs BEFORE the current student:
+            // Swap Trick: needed because ADT only supports "insert after"
             if (student.compareTo(students.retrieve()) < 0) {
-                // THE SWAP TRICK: Because our custom list only has "insert after", 
-                // we replace the current node's data with the new student, 
-                // and then insert the old data right after it!
                 IStudent temp = students.retrieve();
                 students.update(student);
                 students.insert(temp);
@@ -44,25 +38,22 @@ public class StudentList implements IStudentList {
             students.findNext();
         }
 
-        // HEY: We exited the loop, so we must check the very last node!
-        if (students.retrieve().getStudentId() == student.getStudentId()) {
-            return false; 
-        }
+        // Post-loop: Check the final node (since .last() stops the loop)
+        if (students.retrieve().getStudentId() == student.getStudentId()) return false; 
         
-        // Final check on the last node for placement
         if (student.compareTo(students.retrieve()) < 0) {
-            // Apply the Swap Trick on the last node
             IStudent temp = students.retrieve();
             students.update(student);
             students.insert(temp);
         } else {
-            // It is the biggest ID, so it just goes at the very end
-            students.insert(student); 
+            students.insert(student); // New largest ID goes at the end
         }
         
         size++;
         return true;
     }
+
+    
 
     @Override
     public IStudent findById(int studentId) {
@@ -73,11 +64,12 @@ public class StudentList implements IStudentList {
             int currentId = students.retrieve().getStudentId();
             if (currentId == studentId) return students.retrieve();
             
-            // Optimization: Stop early if we pass where the ID should be!
+            // Optimization: Stop early if we pass the target ID
             if (currentId > studentId) return null; 
             
             students.findNext();
         }
+        // Final node check
         if (studentId == students.retrieve().getStudentId()) return students.retrieve();
         return null;
     }
@@ -99,6 +91,11 @@ public class StudentList implements IStudentList {
         }
         return result;
     }
+
+    
+
+[Image of linear search flowchart]
+
 
     @Override
     public LinkedList<IStudent> findByNameContains(String partialName) {
@@ -126,14 +123,10 @@ public class StudentList implements IStudentList {
 
         students.findFirst();
         while (!students.last()) {
-            if (students.retrieve().getEmail().equalsIgnoreCase(email)) {
-                return students.retrieve();
-            }
+            if (students.retrieve().getEmail().equalsIgnoreCase(email)) return students.retrieve();
             students.findNext();
         }
-        if (students.retrieve().getEmail().equalsIgnoreCase(email)) {
-            return students.retrieve();
-        }
+        if (students.retrieve().getEmail().equalsIgnoreCase(email)) return students.retrieve();
         return null;
     }
 
@@ -144,14 +137,10 @@ public class StudentList implements IStudentList {
 
         students.findFirst();
         while (!students.last()) {
-            if (students.retrieve().getMajor().equalsIgnoreCase(major)) {
-                result.insert(students.retrieve());
-            }
+            if (students.retrieve().getMajor().equalsIgnoreCase(major)) result.insert(students.retrieve());
             students.findNext();
         }
-        if (students.retrieve().getMajor().equalsIgnoreCase(major)) {
-            result.insert(students.retrieve());
-        }
+        if (students.retrieve().getMajor().equalsIgnoreCase(major)) result.insert(students.retrieve());
         return result;
     }
 
@@ -162,14 +151,10 @@ public class StudentList implements IStudentList {
 
         students.findFirst();
         while (!students.last()) {
-            if (students.retrieve().getYearLevel() == yearLevel) {
-                result.insert(students.retrieve());
-            }
+            if (students.retrieve().getYearLevel() == yearLevel) result.insert(students.retrieve());
             students.findNext();
         }
-        if (students.retrieve().getYearLevel() == yearLevel) {
-            result.insert(students.retrieve());
-        }
+        if (students.retrieve().getYearLevel() == yearLevel) result.insert(students.retrieve());
         return result;
     }
 
@@ -196,16 +181,16 @@ public class StudentList implements IStudentList {
             int currentId = students.retrieve().getStudentId();
             if (currentId == studentId) {
                 students.remove(); 
-                size--; // HEY: We must subtract from our manual size counter!
+                size--; // Keep manual counter in sync
                 return true;
             }
-            // Optimization: stop early if we pass it
-            if (currentId > studentId) return false;
+            if (currentId > studentId) return false; // Early exit for sorted list
             students.findNext();
         }
+        // Last node deletion check
         if (studentId == students.retrieve().getStudentId()) {
             students.remove();
-            size--; // HEY: Subtracting here too!
+            size--; 
             return true;
         }
         return false;
@@ -213,7 +198,6 @@ public class StudentList implements IStudentList {
 
     @Override
     public int size() {
-        // HEY: We return our manual counter because the custom list has no getSize() method!
-        return this.size;
+        return this.size; // Returns O(1) manual count
     }
 }
