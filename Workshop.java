@@ -1,16 +1,11 @@
-package datastructcureproject;
 
-/**
- * Represents a workshop involving multiple students.
- */
 public class Workshop extends Event implements IWorkshop {
     
     private IStudentList students;
 
-    // Only ONE constructor needed: Workshops start empty, and students are added later!
     public Workshop(int eventId, String title, IDateTime startDateTime, IDateTime endDateTime, String location) {
         super(eventId, title, startDateTime, endDateTime, location);
-        this.students = new StudentList(); // Initialize the custom list we built
+        this.students = new StudentList(); 
     }
 
     @Override
@@ -20,7 +15,7 @@ public class Workshop extends Event implements IWorkshop {
 
     @Override
     public boolean addParticipant(IStudent student) {
-        return this.students.add(student); // Hands it off to our O(N) custom list
+        return this.students.add(student); 
     }
 
     @Override
@@ -53,13 +48,11 @@ public class Workshop extends Event implements IWorkshop {
             result += "  [No students registered yet]\n";
             return result;
         }
-
         list.findFirst();
         while (!list.last()) {
             result += "  - " + list.retrieve().getName() + " (" + list.retrieve().getStudentId() + ")\n";
             list.findNext();
         }
-        // Grab the final student
         result += "  - " + list.retrieve().getName() + " (" + list.retrieve().getStudentId() + ")\n";
         
         return result;
